@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>T-rav</Authors>
+    <Company>StoneAge Technologies</Company>
+    <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
+    <PackageReleaseNotes>Inital release</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="StoneAge.System.Utils.DotNetCore" Version="1.5.0" />
+  </ItemGroup>
+
+</Project>
