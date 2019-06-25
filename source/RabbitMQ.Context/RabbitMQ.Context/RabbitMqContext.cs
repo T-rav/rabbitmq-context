@@ -6,7 +6,7 @@ using StoneAge.System.Utils.Json;
 
 namespace RabbitMQ.Context
 {
-    public class RabbitMqContext
+    public class RabbitMqContext : IRabbitMqContext
     {
         private readonly IConnectionFactory _connectionFactory;
 
@@ -74,7 +74,7 @@ namespace RabbitMQ.Context
         }
 
 #pragma warning disable 618
-        public QueueingBasicConsumer RegisterBasicConsumer(string queueName, IModel channel)
+        private QueueingBasicConsumer RegisterBasicConsumer(string queueName, IModel channel)
 
         {
             var basicConsumer = MakeConsumer(channel);

@@ -5,8 +5,9 @@
     <Authors>T-rav</Authors>
     <Company>StoneAge Technologies</Company>
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
-    <PackageReleaseNotes>Inital release</PackageReleaseNotes>
+    <PackageReleaseNotes>Added interface for RabbitMqContext</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
