@@ -1,13 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Authors>T-rav</Authors>
     <Company>StoneAge Technologies</Company>
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
-    <PackageReleaseNotes>Added interface for RabbitMqContext</PackageReleaseNotes>
+    <PackageReleaseNotes>Migrated from old way of handling message to event driven method.</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
