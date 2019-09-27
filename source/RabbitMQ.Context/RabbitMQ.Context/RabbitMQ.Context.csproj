@@ -7,11 +7,11 @@
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
     <PackageReleaseNotes>Reverted to old non-event method. Now set to prefetch 250 messages and process in a single go. Should help get performance back up.</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.1" />
     <PackageReference Include="StoneAge.System.Utils.DotNetCore" Version="1.5.0" />
   </ItemGroup>
 

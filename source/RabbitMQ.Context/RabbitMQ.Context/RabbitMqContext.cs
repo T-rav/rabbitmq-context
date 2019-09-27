@@ -86,9 +86,7 @@ namespace RabbitMQ.Context
         private async Task ProcessMessage(Func<byte[], Task<bool>> action, QueueingBasicConsumer basicConsumer,
             IModel channel)
         {
-            // todo : make this a loop to process messages
-
-            var ea = basicConsumer.Queue.DequeueNoWait(null);
+            var ea = basicConsumer.Queue.Dequeue();
             while (ea != null)
             {
                 var body = ea.Body;
