@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using StoneAge.System.Utils.Json;
 
 namespace RabbitMQ.Context
@@ -62,21 +61,9 @@ namespace RabbitMQ.Context
                 using (var channel = connection.CreateModel())
                 {
                     DeclareQueue(queueName, channel);
-                    Limit_Prefetch_To(250, channel);
-
-                    var consumer = new EventingBasicConsumer(channel);
-                    consumer.Received += async (sender, args) =>
-                    {
-                        var body = args.Body;
-
-                        var result = await action.Invoke(body);
-
-                        if (result)
-                        {
-                            channel.BasicAck(args.DeliveryTag, false);
-                        }
-                    };
-                    channel.BasicConsume(queueName, false, consumer);
+                    Limit_Prefetch_To(250, channel); // todo : config prefetch
+                    var basicConsumer = RegisterBasicConsumer(queueName, channel);
+                    await ProcessMessage(action, basicConsumer, channel);
                 }
             }
         }
@@ -84,6 +71,37 @@ namespace RabbitMQ.Context
         private static void Limit_Prefetch_To(ushort prefetchCount, IModel channel)
         {
             channel.BasicQos(0, prefetchCount, false);
+        }
+
+#pragma warning disable 618
+        private QueueingBasicConsumer RegisterBasicConsumer(string queueName, IModel channel)
+
+        {
+            var basicConsumer = MakeConsumer(channel);
+            channel.BasicConsume(queue: queueName, autoAck: false, consumer: basicConsumer);
+
+            return basicConsumer;
+        }
+
+        private async Task ProcessMessage(Func<byte[], Task<bool>> action, QueueingBasicConsumer basicConsumer,
+            IModel channel)
+        {
+            // todo : make this a loop to process messages
+
+            var ea = basicConsumer.Queue.DequeueNoWait(null);
+            while (ea != null)
+            {
+                var body = ea.Body;
+
+                var result = await action.Invoke(body);
+
+                if (result)
+                {
+                    channel.BasicAck(ea.DeliveryTag, false);
+                }
+
+                ea = basicConsumer.Queue.DequeueNoWait(null);
+            }
         }
 
         private void DeclareQueue(string name, IModel channel)

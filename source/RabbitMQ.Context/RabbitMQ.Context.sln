@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMQ.Context", "RabbitMQ.Context\RabbitMQ.Context.csproj", "{F55C96FB-E38D-4E7B-9AD4-C1347E007822}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Context.Tests", "..\RabbitMq.Context.Tests\RabbitMq.Context.Tests.csproj", "{A2B5EDBF-F923-4E64-8CEB-9A580DBD7952}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMq.Context.Tests", "..\RabbitMq.Context.Tests\RabbitMq.Context.Tests.csproj", "{A2B5EDBF-F923-4E64-8CEB-9A580DBD7952}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
