@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using StoneAge.System.Utils.Json;
 
 namespace RabbitMQ.Context
@@ -68,6 +70,20 @@ namespace RabbitMQ.Context
             }
         }
 
+        public async Task BatchConsumeMessage(string queueName, Func<List<byte[]>, Task<bool>> action)
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                using (var channel = connection.CreateModel())
+                {
+                    DeclareQueue(queueName, channel);
+                    Limit_Prefetch_To(1000, channel); // todo : config prefetch
+                    var basicConsumer = RegisterBasicConsumer(queueName, channel);
+                    await BatchProcessMessage(action, basicConsumer, channel);
+                }
+            }
+        }
+
         private static void Limit_Prefetch_To(ushort prefetchCount, IModel channel)
         {
             channel.BasicQos(0, prefetchCount, false);
@@ -83,8 +99,9 @@ namespace RabbitMQ.Context
             return basicConsumer;
         }
 
-        private async Task ProcessMessage(Func<byte[], Task<bool>> action, QueueingBasicConsumer basicConsumer,
-            IModel channel)
+        private async Task ProcessMessage(Func<byte[], Task<bool>> action, 
+                                          QueueingBasicConsumer basicConsumer,
+                                          IModel channel)
         {
             var ea = basicConsumer.Queue.Dequeue();
             while (ea != null)
@@ -99,6 +116,30 @@ namespace RabbitMQ.Context
                 }
 
                 ea = basicConsumer.Queue.DequeueNoWait(null);
+            }
+        }
+
+        private async Task BatchProcessMessage(Func<List<byte[]>, Task<bool>> action,
+                                                QueueingBasicConsumer basicConsumer,
+                                                IModel channel)
+        {
+            var events = new List<BasicDeliverEventArgs>();
+            var messages = new List<byte[]>();
+            var message = basicConsumer.Queue.Dequeue();
+            while (message != null)
+            {
+                messages.Add(message.Body);
+                events.Add(message);
+                message = basicConsumer.Queue.DequeueNoWait(null);
+            }
+
+            var result = await action.Invoke(messages);
+            if (result)
+            {
+                foreach (var ea in events)
+                {
+                    channel.BasicAck(ea.DeliveryTag, false);
+                }
             }
         }
 

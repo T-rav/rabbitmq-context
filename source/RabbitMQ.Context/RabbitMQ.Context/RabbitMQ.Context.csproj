@@ -5,9 +5,9 @@
     <Authors>T-rav</Authors>
     <Company>StoneAge Technologies</Company>
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
-    <PackageReleaseNotes>Reverted to old non-event method. Now set to prefetch 250 messages and process in a single go. Should help get performance back up.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added BatchConsumeMessage to handle messages in bulk -&gt; fixed bug in ack of all message</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.4</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

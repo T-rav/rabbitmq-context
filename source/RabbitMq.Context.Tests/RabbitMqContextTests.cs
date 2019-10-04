@@ -11,6 +11,7 @@ using RabbitMq.TestContext;
 
 namespace RabbitMq.Context.Tests
 {
+    // todo : test batch method
     [TestFixture]
     public class RabbitMqContextTests
     {
