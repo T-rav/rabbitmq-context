@@ -5,9 +5,9 @@
     <Authors>T-rav</Authors>
     <Company>StoneAge Technologies</Company>
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
-    <PackageReleaseNotes>Added BatchConsumeMessage to handle messages in bulk -&gt; fixed bug in ack of all message</PackageReleaseNotes>
+    <PackageReleaseNotes>Changes ConsumeMessage back to 1 prefetch</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

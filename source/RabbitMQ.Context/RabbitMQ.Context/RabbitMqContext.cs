@@ -63,7 +63,7 @@ namespace RabbitMQ.Context
                 using (var channel = connection.CreateModel())
                 {
                     DeclareQueue(queueName, channel);
-                    Limit_Prefetch_To(250, channel); // todo : config prefetch
+                    Limit_Prefetch_To(1, channel); // todo : config prefetch
                     var basicConsumer = RegisterBasicConsumer(queueName, channel);
                     await ProcessMessage(action, basicConsumer, channel);
                 }
