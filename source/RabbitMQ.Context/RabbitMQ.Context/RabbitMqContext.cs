@@ -70,14 +70,14 @@ namespace RabbitMQ.Context
             }
         }
 
-        public async Task BatchConsumeMessage(string queueName, Func<List<byte[]>, Task<bool>> action)
+        public async Task BatchConsumeMessage(string queueName, ushort batchSize, Func<List<byte[]>, Task<bool>> action)
         {
             using (var connection = _connectionFactory.CreateConnection())
             {
                 using (var channel = connection.CreateModel())
                 {
                     DeclareQueue(queueName, channel);
-                    Limit_Prefetch_To(1000, channel); // todo : config prefetch
+                    Limit_Prefetch_To(batchSize, channel); // todo : config prefetch
                     var basicConsumer = RegisterBasicConsumer(queueName, channel);
                     await BatchProcessMessage(action, basicConsumer, channel);
                 }
