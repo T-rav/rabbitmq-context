@@ -221,7 +221,32 @@ namespace RabbitMq.Context.Tests
                 // assert
                 rabbitMqContext.Assert_Queue_Message_Count_Is(1);
             }
+        }
 
+        [TestFixture]
+        public class BehaviorWithLotsOfMessages
+        {
+            [Test]
+            public async Task WhenProcessingOfMessageSuccessful_ShouldAckMessage()
+            {
+                // arrange
+                var queueName = "test-queue";
+                Func<List<byte[]>, Task<bool>> action = (List<byte[]> bytes) => Task.FromResult(true);
+
+                var rabbitMqContext = new RabbitMqTestContextBuilder()
+                    .With_Queue(queueName)
+                    .Build();
+
+                for (var i = 0; i < 1; i++)
+                {
+                    rabbitMqContext.PublishMessage(queueName, "hello_world");
+                }
+
+                // act
+                await rabbitMqContext.BatchConsumeMessage(queueName, 10, action);
+                // assert
+                rabbitMqContext.Assert_Queue_Message_Count_Is(0);
+            }
         }
     }
 }
