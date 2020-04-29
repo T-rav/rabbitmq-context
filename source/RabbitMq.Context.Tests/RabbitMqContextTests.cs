@@ -237,7 +237,7 @@ namespace RabbitMq.Context.Tests
                     .With_Queue(queueName)
                     .Build();
 
-                for (var i = 0; i < 1; i++)
+                for (var i = 0; i < 2; i++)
                 {
                     rabbitMqContext.PublishMessage(queueName, "hello_world");
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -72,6 +73,7 @@ namespace RabbitMQ.Context
 
         public async Task BatchConsumeMessage(string queueName, ushort batchSize, Func<List<byte[]>, Task<bool>> action)
         {
+            var exchange = string.Empty;
             using (var connection = _connectionFactory.CreateConnection())
             {
                 using (var channel = connection.CreateModel())
@@ -79,7 +81,7 @@ namespace RabbitMQ.Context
                     DeclareQueue(queueName, channel);
                     Limit_Prefetch_To(batchSize, channel); // todo : config prefetch
                     var basicConsumer = RegisterBasicConsumer(queueName, channel);
-                    await BatchProcessMessage(action, basicConsumer, channel);
+                    await BatchProcessMessage(action, basicConsumer, channel, exchange, queueName);
                 }
             }
         }
@@ -94,7 +96,7 @@ namespace RabbitMQ.Context
 
         {
             var basicConsumer = MakeConsumer(channel);
-            channel.BasicConsume(queue: queueName, autoAck: false, consumer: basicConsumer);
+            channel.BasicConsume(queue: queueName, autoAck: true, consumer: basicConsumer);
 
             return basicConsumer;
         }
@@ -121,23 +123,24 @@ namespace RabbitMQ.Context
 
         private async Task BatchProcessMessage(Func<List<byte[]>, Task<bool>> action,
                                                 QueueingBasicConsumer basicConsumer,
-                                                IModel channel)
+                                                IModel channel,
+                                                string exchange,
+                                                string queue)
         {
-
-            while (true)
+            var messages = new List<BasicDeliverEventArgs>();
+            var input = new List<byte[]>();
+            var message = basicConsumer.Queue.Dequeue();
+            while (message != null)
             {
-                var delivery = basicConsumer.Queue.DequeueNoWait(null);
-                if (No_More_Messages(delivery))
-                {
-                    break;
-                }
-
-                var result = await action.Invoke(new List<byte[]> { delivery.Body });
-                if (result)
-                {
-                    channel.BasicAck(delivery.DeliveryTag, false);
-                }
+                input.Add(message.Body);
+                messages.Add(message);
+                message = basicConsumer.Queue.DequeueNoWait(null);
             }
+
+            var result = await action.Invoke(input);
+            Process_Ack_For_Messages(channel, exchange, queue, messages, result);
+
+            //}
 
             /*
             var events = new List<BasicDeliverEventArgs>();
@@ -158,6 +161,29 @@ namespace RabbitMQ.Context
                     channel.BasicAck(ea.DeliveryTag, false);
                 }
             }*/
+        }
+
+        private static bool Valid_Message(BasicDeliverEventArgs message) => message != default(BasicDeliverEventArgs);
+        private static bool No_Messages_To_Process(List<BasicDeliverEventArgs> messages) => messages.Count() == 0;
+
+        private static void Process_Ack_For_Messages(IModel channel, 
+                                                     string exchange, 
+                                                     string queue, 
+                                                     List<BasicDeliverEventArgs> messages, 
+                                                     bool result)
+        {
+            var properties = Create_DurableMessage_Properties(channel);
+            foreach (var ea in messages)
+            {
+                channel.BasicAck(ea.DeliveryTag, false);
+                if (!result)
+                {
+                    channel.BasicPublish(exchange,
+                        queue,
+                        properties,
+                        ea.Body);
+                }
+            }
         }
 
         private static bool No_More_Messages(BasicDeliverEventArgs delivery) => delivery == default(BasicDeliverEventArgs);
