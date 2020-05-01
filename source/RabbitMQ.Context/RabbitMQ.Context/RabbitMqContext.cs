@@ -81,7 +81,7 @@ namespace RabbitMQ.Context
                     DeclareQueue(queueName, channel);
                     Limit_Prefetch_To(batchSize, channel); // todo : config prefetch
                     var basicConsumer = RegisterBasicConsumer(queueName, channel);
-                    await BatchProcessMessage(action, basicConsumer, channel, exchange, queueName);
+                    await BatchProcessMessage(action, basicConsumer, channel);
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace RabbitMQ.Context
 
         {
             var basicConsumer = MakeConsumer(channel);
-            channel.BasicConsume(queue: queueName, autoAck: true, consumer: basicConsumer);
+            channel.BasicConsume(queue: queueName, autoAck: false, consumer: basicConsumer);
 
             return basicConsumer;
         }
@@ -123,24 +123,18 @@ namespace RabbitMQ.Context
 
         private async Task BatchProcessMessage(Func<List<byte[]>, Task<bool>> action,
                                                 QueueingBasicConsumer basicConsumer,
-                                                IModel channel,
-                                                string exchange,
-                                                string queue)
+                                                IModel channel)
         {
-            var messages = new List<BasicDeliverEventArgs>();
-            var input = new List<byte[]>();
-            var message = basicConsumer.Queue.Dequeue();
-            while (message != null)
+            while (true)
             {
-                input.Add(message.Body);
-                messages.Add(message);
+                var message = basicConsumer.Queue.Dequeue();
+                var result = await action.Invoke(new List<byte[]> { message.Body });
+                if (result)
+                {
+                    channel.BasicAck(message.DeliveryTag, false);
+                }
                 message = basicConsumer.Queue.DequeueNoWait(null);
             }
-
-            var result = await action.Invoke(input);
-            Process_Ack_For_Messages(channel, exchange, queue, messages, result);
-
-            //}
 
             /*
             var events = new List<BasicDeliverEventArgs>();
