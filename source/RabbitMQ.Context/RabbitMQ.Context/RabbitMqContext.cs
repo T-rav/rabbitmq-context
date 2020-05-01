@@ -125,15 +125,20 @@ namespace RabbitMQ.Context
                                                 QueueingBasicConsumer basicConsumer,
                                                 IModel channel)
         {
+            var message = basicConsumer.Queue.Dequeue();
+
             while (true)
             {
-                var message = basicConsumer.Queue.Dequeue();
                 var result = await action.Invoke(new List<byte[]> { message.Body });
                 if (result)
                 {
                     channel.BasicAck(message.DeliveryTag, false);
                 }
                 message = basicConsumer.Queue.DequeueNoWait(null);
+                if(message == null)
+                {
+                    break;
+                }
             }
 
             /*
