@@ -125,23 +125,6 @@ namespace RabbitMQ.Context
                                                 QueueingBasicConsumer basicConsumer,
                                                 IModel channel)
         {
-            var message = basicConsumer.Queue.Dequeue();
-
-            while (true)
-            {
-                var result = await action.Invoke(new List<byte[]> { message.Body });
-                if (result)
-                {
-                    channel.BasicAck(message.DeliveryTag, false);
-                }
-                message = basicConsumer.Queue.DequeueNoWait(null);
-                if(message == null)
-                {
-                    break;
-                }
-            }
-
-            /*
             var events = new List<BasicDeliverEventArgs>();
             var messages = new List<byte[]>();
             var message = basicConsumer.Queue.Dequeue();
@@ -159,7 +142,7 @@ namespace RabbitMQ.Context
                 {
                     channel.BasicAck(ea.DeliveryTag, false);
                 }
-            }*/
+            }
         }
 
         private static bool Valid_Message(BasicDeliverEventArgs message) => message != default(BasicDeliverEventArgs);

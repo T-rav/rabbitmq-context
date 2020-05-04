@@ -5,9 +5,9 @@
     <Authors>T-rav</Authors>
     <Company>StoneAge Technologies</Company>
     <Description>A simple context object to help with publishing and consuming messages from RabbitMQ</Description>
-    <PackageReleaseNotes>Fixed internal bug with null message</PackageReleaseNotes>
+    <PackageReleaseNotes>Reverted back to requeue situation since it seems the fastest</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.2.7</Version>
+    <Version>1.2.8</Version>
   </PropertyGroup>
 
   <ItemGroup>
